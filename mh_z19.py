@@ -5,9 +5,7 @@
 
 import serial
 import time
-import subprocess
 import traceback
-import getrpimodel
 import struct
 import platform
 import argparse
@@ -17,14 +15,7 @@ import json
 # setting
 version = "0.3.7"
 
-if getrpimodel.model() == "3 Model B":
-  serial_dev = '/dev/ttyS0'
-  stop_getty = 'sudo systemctl stop serial-getty@ttyS0.service'
-  start_getty = 'sudo systemctl start serial-getty@ttyS0.service'
-else:
-  serial_dev = '/dev/ttyAMA0'
-  stop_getty = 'sudo systemctl stop serial-getty@ttyAMA0.service'
-  start_getty = 'sudo systemctl start serial-getty@ttyAMA0.service'
+serial_dev = '/dev/tty.wchusbserialfa130'
 
 # major version of running python
 p_ver = platform.python_version_tuple()[0]
@@ -56,14 +47,11 @@ def mh_z19():
      traceback.print_exc()
 
 def read():
-  p = subprocess.call(stop_getty, stdout=subprocess.PIPE, shell=True)
   result = mh_z19()
-  p = subprocess.call(start_getty, stdout=subprocess.PIPE, shell=True)
   if result is not None:
     return result
 
 def read_all():
-  p = subprocess.call(stop_getty, stdout=subprocess.PIPE, shell=True)
   try:
     ser = connect_serial()
     while 1:
@@ -91,62 +79,49 @@ def read_all():
   except:
      traceback.print_exc()
 
-  p = subprocess.call(start_getty, stdout=subprocess.PIPE, shell=True)
   if result is not None:
     return result
 
 def abc_on():
-  p = subprocess.call(stop_getty, stdout=subprocess.PIPE, shell=True)
   ser = connect_serial()
   result=ser.write(b"\xff\x01\x79\xa0\x00\x00\x00\x00\xe6")
   ser.close()
-  p = subprocess.call(start_getty, stdout=subprocess.PIPE, shell=True)
 
 def abc_off():
-  p = subprocess.call(stop_getty, stdout=subprocess.PIPE, shell=True)
   ser = connect_serial()
   result=ser.write(b"\xff\x01\x79\x00\x00\x00\x00\x00\x86")
   ser.close()
-  p = subprocess.call(start_getty, stdout=subprocess.PIPE, shell=True)
 
 def span_point_calibration(span):
-  p = subprocess.call(stop_getty, stdout=subprocess.PIPE, shell=True)
   ser = connect_serial()
   if p_ver == '2':
     b3 = span / 256;
   else:
-    b3 = span // 256;   
+    b3 = span // 256;
   byte3 = struct.pack('B', b3)
   b4 = span % 256; byte4 = struct.pack('B', b4)
   c = checksum([0x01, 0x88, b3, b4])
   request = b"\xff\x01\x88" + byte3 + byte4 + b"\x00\x00\x00" + c
   result = ser.write(request)
   ser.close()
-  p = subprocess.call(start_getty, stdout=subprocess.PIPE, shell=True)
 
 def zero_point_calibration():
-  p = subprocess.call(stop_getty, stdout=subprocess.PIPE, shell=True)
   ser = connect_serial()
   request = b"\xff\x01\x87\x00\x00\x00\x00\x00\x78"
   result = ser.write(request)
   ser.close()
-  p = subprocess.call(start_getty, stdout=subprocess.PIPE, shell=True)
 
 def detection_range_5000():
-  p = subprocess.call(stop_getty, stdout=subprocess.PIPE, shell=True)
   ser = connect_serial()
   request = b"\xff\x01\x99\x00\x00\x00\x13\x88\xcb"
   result = ser.write(request)
   ser.close()
-  p = subprocess.call(start_getty, stdout=subprocess.PIPE, shell=True)
 
 def detection_range_2000():
-  p = subprocess.call(stop_getty, stdout=subprocess.PIPE, shell=True)
   ser = connect_serial()
   request = b"\xff\x01\x99\x00\x00\x00\x07\xd0\x8F"
   result = ser.write(request)
   ser.close()
-  p = subprocess.call(start_getty, stdout=subprocess.PIPE, shell=True)
 
 def checksum(array):
   return struct.pack('B', 0xff - (sum(array) % 0x100) + 1)
