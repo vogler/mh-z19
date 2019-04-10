@@ -15,7 +15,7 @@ import json
 # setting
 version = "0.3.7"
 
-serial_dev = '/dev/tty.wchusbserialfa130'
+serial_dev = '/dev/ttyUSB0'
 
 # major version of running python
 p_ver = platform.python_version_tuple()[0]
