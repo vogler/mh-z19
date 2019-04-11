@@ -12,6 +12,11 @@ import argparse
 import sys
 import json
 
+import paho.mqtt.client as mqtt
+client = mqtt.Client()
+client.connect("localhost")
+client.loop_start()
+
 # setting
 version = "0.3.7"
 
@@ -139,6 +144,9 @@ if __name__ == '__main__':
   group.add_argument("--all",
                       action='store_true',
                       help='''return all (co2, temperature, TT, SS and UhUl) as json''')
+  group.add_argument("--mqtt",
+                      action='store_true',
+                      help='''publish all data to mqtt every 10s''')
   group.add_argument("--abc_on",
                       action='store_true',
                       help='''Set ABC functionality on model B as ON.''')
@@ -183,6 +191,12 @@ if __name__ == '__main__':
   elif args.all:
     value = read_all()
     print (json.dumps(value))
+  elif args.mqtt:
+    while True:
+      data = json.dumps(read_all())
+      print (data)
+      client.publish("sensors/mh-z19b", data)
+      time.sleep(10)
   else:
     value = read()
     print (json.dumps(value))
