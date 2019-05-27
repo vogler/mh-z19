@@ -20,7 +20,7 @@ client.loop_start()
 # setting
 version = "0.3.7"
 
-serial_dev = '/dev/ttyUSB0'
+serial_dev = '/dev/serial/by-path/platform-3f980000.usb-usb-0:1.5:1.0-port0'
 
 # major version of running python
 p_ver = platform.python_version_tuple()[0]
